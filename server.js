@@ -80,6 +80,11 @@ app.post('/REGISTER', (req, res) => {
   });
 })
 
+function authenticateToken(req, res, next) {
+  console.log('Authentication in progress')
+  next()
+}
+
 app.get('/REGISTER', (req, res) => {
   res.render('register.ejs')
 })
