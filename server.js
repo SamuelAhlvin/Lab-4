@@ -12,6 +12,7 @@ app.use(express.json());
 let currentKey = null;
 let isAdmin = null;
 let dbData = null;
+let currentUser = null;
 
 app.get('/', (req, res) => {
   res.redirect("/identify")
@@ -40,6 +41,8 @@ app.post('/identify', async (req, res) => {
       isAdmin = username == "admin"
       const token = jwt.sign(username, process.env.TOKEN);
       currentKey = token;
+      currentUser = username;
+      dbData = await db.dbData();
       res.redirect("/GRANTED")
     } else {
       res.render('fail.ejs');
@@ -54,14 +57,14 @@ app.post('/identify', async (req, res) => {
 function authenticateToken(req, res, next) {
   if (currentKey == "") {
     res.redirect("/identify")
-  } else if (jwt.verify(currentKey, process.env.TOKEN)) {
+  } else if (jwt.verify(currentKey, process.env.TOKEN,)) {
     next();
   } else {
-    res.redirect("/identify")
+    return res.status(401).send('Unauthorized')
   }
 }
 
-app.get('/GRANTED', authenticateToken, async (req, res) => {
+app.get('/GRANTED', authenticateToken, (req, res) => {
 
   if (isAdmin) {
     res.redirect("/admin");
@@ -70,21 +73,44 @@ app.get('/GRANTED', authenticateToken, async (req, res) => {
   }
 })
 
-app.get('/admin', async (req, res) => {
-  dbData = await db.dbData();
-  res.render('admin.ejs', { dbData });
+app.get('/admin', authenticateToken, (req, res) => {
+  if (isAdmin) {
+    res.render('admin.ejs', { dbData });
+  } else {
+    currentUser = null;
+    currentKey = null;
+    res.redirect("/identify")
+  }
 })
 
-app.get('/student1', (req, res) => {
-  res.render('student1.ejs')
+app.get('/student1', authenticateToken, (req, res) => {
+  if (currentUser == "user1") {
+    res.render('student1.ejs')
+  } else {
+    currentUser = null;
+    currentKey = null;
+    res.redirect("/identify")
+  }
 })
 
-app.get('/student2', (req, res) => {
-  res.render('student2.ejs')
+app.get('/student2', authenticateToken, (req, res) => {
+  if (currentUser == "user2") {
+    res.render('student2.ejs')
+  } else {
+    currentUser = null;
+    currentKey = null;
+    res.redirect("/identify")
+  }
 })
 
-app.get('/teacher', (req, res) => {
-  res.render('teacher.ejs')
+app.get('/teacher', authenticateToken, (req, res) => {
+  if (currentUser == "user3") {
+    res.render('teacher.ejs')
+  } else {
+    currentUser = null;
+    currentKey = null;
+    res.redirect("/identify")
+  }
 })
 
 app.listen(5000, () => {

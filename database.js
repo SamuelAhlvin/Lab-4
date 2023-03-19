@@ -15,7 +15,7 @@ async function userExists(username) {
   })
 }
 
-//Gets all user info
+//Get all user info
 async function dbData() {
   return new Promise((resolve, reject) => {
     db.all(`SELECT * FROM users`, (error, rows) => {
