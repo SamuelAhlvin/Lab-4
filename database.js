@@ -15,6 +15,16 @@ async function userExists(username) {
   })
 }
 
+//Get userInfo
+async function userInfo(username) {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT * FROM users WHERE name = $username `, { $username: username }, (error, rows) => {
+      if (error) reject(error)
+      else resolve(rows)
+    })
+  })
+}
+
 //Get all user info
 async function dbData() {
   return new Promise((resolve, reject) => {
@@ -60,4 +70,5 @@ module.exports = {
   registerUser,
   validateLogin,
   dbData,
+  userInfo,
 }

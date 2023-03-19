@@ -13,7 +13,7 @@ let currentKey = null;
 let isAdmin = null;
 let dbData = null;
 let currentUser = null;
-
+let currentRole = null;
 app.get('/', (req, res) => {
   res.redirect("/identify")
 })
@@ -43,6 +43,8 @@ app.post('/identify', async (req, res) => {
       currentKey = token;
       currentUser = username;
       dbData = await db.dbData();
+      userInfo = await db.userInfo(username);
+      currentRole = userInfo[0].role;
       res.redirect("/GRANTED")
     } else {
       res.render('fail.ejs');
@@ -84,7 +86,7 @@ app.get('/admin', authenticateToken, (req, res) => {
 })
 
 app.get('/student1', authenticateToken, (req, res) => {
-  if (currentUser == "user1") {
+  if (currentUser == "user1" || currentRole == "teacher" || isAdmin) {
     res.render('student1.ejs')
   } else {
     currentUser = null;
@@ -94,7 +96,7 @@ app.get('/student1', authenticateToken, (req, res) => {
 })
 
 app.get('/student2', authenticateToken, (req, res) => {
-  if (currentUser == "user2") {
+  if (currentUser == "user2" || currentRole == "teacher" || isAdmin) {
     res.render('student2.ejs')
   } else {
     currentUser = null;
@@ -104,7 +106,7 @@ app.get('/student2', authenticateToken, (req, res) => {
 })
 
 app.get('/teacher', authenticateToken, (req, res) => {
-  if (currentUser == "user3") {
+  if (currentRole == "teacher" || isAdmin) {
     res.render('teacher.ejs')
   } else {
     currentUser = null;
